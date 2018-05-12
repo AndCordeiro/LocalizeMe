@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Localize Me</string>
+
+    <string name="request_gps_enable_title">Enable location</string>
+    <string name="request_gps_enable_msg">We need your enabled location to proceed</string>
+    <string name="request_gps_enable_button">Enable location</string>
+    <string name="google_maps_key">Your Key Here</string>
+    <string name="search">Search</string>
+
+</resources>
