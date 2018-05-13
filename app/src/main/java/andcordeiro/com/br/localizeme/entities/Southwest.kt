@@ -9,11 +9,9 @@ import com.google.gson.annotations.SerializedName
 class Southwest: Serializable {
 
     @SerializedName("lat")
-    @Expose
-    private var lat: Double? = null
+    var lat: Double? = null
     @SerializedName("lng")
-    @Expose
-    private var lng: Double? = null
+    var lng: Double? = null
 
     override fun toString(): String {
         return "Southwest(lat=$lat, lng=$lng)"

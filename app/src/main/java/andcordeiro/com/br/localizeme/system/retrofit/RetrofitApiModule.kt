@@ -33,8 +33,7 @@ class RetrofitApiModule {
     }
 
     @Provides
-    fun provideApiService(): MapsApiService{
-        return provideRetrofit(baseUrl, provideClient()).create(MapsApiService::class.java)
-    }
+    fun provideApiService(): MapsApiService = provideRetrofit(baseUrl,
+            provideClient()).create(MapsApiService::class.java)
 
 }

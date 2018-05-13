@@ -8,16 +8,22 @@ interface MapsMVP{
 
     interface View{
 
-        fun createMyMakerPosition(location: Location)
+        fun createMyMakerPosition(location: Location?)
 
-        fun updateMyMakerPosition(location: Location)
+        fun updateMyMakerPosition(location: Location?)
 
-        fun setMakersPlaces(locations: List<Location>)
+        fun setMakersPlaces(result: Result)
 
-        fun showMessage(msg: String?)
+        fun shortShowMessage(msg: String?)
+
+        fun longShowMessage(msg: String?)
+
+        fun requestProviderEnable()
+
+        fun clearMapsMakers()
     }
 
-    interface Presenter{
+    interface Presenter: Gps {
 
         fun setView(view: MapsMVP.View)
 
@@ -25,12 +31,14 @@ interface MapsMVP{
 
         fun loadPlaces(query: String?)
 
-        fun getPosition(): Location
+        fun setMyMarkerCreated(boolean: Boolean)
+
+        fun getMyMarkerCreated(): Boolean
 
     }
 
     interface Model{
-        fun loadPlaces(query: String, location: Location): Observable<Result>
+        fun loadPlaces(query: String, location: Location?): Observable<Result>
     }
 
 }

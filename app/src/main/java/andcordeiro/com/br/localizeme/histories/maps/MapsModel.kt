@@ -13,13 +13,15 @@ import java.util.concurrent.Callable
 
 class MapsModel(var api: MapsApiService, var context: Context): MapsMVP.Model {
 
-    override fun loadPlaces(query: String, location: Location): Observable<Result> {
-        return makeObservable(Callable {load(query, location)}).subscribeOn(Schedulers.computation())
+    override fun loadPlaces(query: String, location: Location?): Observable<Result> {
+        return makeObservable(Callable {load(query, location)})
+                .subscribeOn(Schedulers.computation())
     }
 
-    private fun load(query: String, location: Location): Result {
+    private fun load(query: String, location: Location?): Result {
         var result = Result()
-            val callback = api.getPlaces(location.toString(), query, "distance", "pt-BR",
+            val callback =
+                    api.getPlaces(location.toString(), query, "distance", "pt-BR",
                     context.getString(R.string.google_maps_key)).execute()
             result = callback.body() as Result
         return result

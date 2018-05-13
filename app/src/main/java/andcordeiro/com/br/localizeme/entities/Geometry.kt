@@ -8,11 +8,9 @@ import java.io.Serializable
 class Geometry: Serializable {
 
     @SerializedName("location")
-    @Expose
-    private var location: Location? = null
+    var location: Location? = null
     @SerializedName("viewport")
-    @Expose
-    private var viewport: Viewport? = null
+    var viewport: Viewport? = null
 
     override fun toString(): String {
         return "Geometry(location=$location, viewport=$viewport)"

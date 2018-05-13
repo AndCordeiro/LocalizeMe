@@ -8,11 +8,9 @@ import java.io.Serializable
 class Viewport: Serializable {
 
     @SerializedName("northeast")
-    @Expose
-    private var northeast: Northeast? = null
+    var northeast: Northeast? = null
     @SerializedName("southwest")
-    @Expose
-    private var southwest: Southwest? = null
+    var southwest: Southwest? = null
 
     override fun toString(): String {
         return "Viewport(northeast=$northeast, southwest=$southwest)"
