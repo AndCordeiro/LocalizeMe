@@ -1,5 +1,6 @@
 package andcordeiro.com.br.localizeme.system.retrofit
 
+import andcordeiro.com.br.localizeme.BuildConfig
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -17,7 +18,9 @@ class RetrofitApiModule {
     fun provideClient(): OkHttpClient{
 
         val interceptor = HttpLoggingInterceptor()
-        interceptor.level = HttpLoggingInterceptor.Level.BODY
+
+        if(BuildConfig.DEBUG)
+            interceptor.level = HttpLoggingInterceptor.Level.BODY
 
         return OkHttpClient.Builder().addInterceptor(interceptor).build()
     }

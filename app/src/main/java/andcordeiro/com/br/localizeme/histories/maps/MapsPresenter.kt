@@ -1,16 +1,16 @@
 package andcordeiro.com.br.localizeme.histories.maps
 
 
-import andcordeiro.com.br.localizeme.entities.Location
-import andcordeiro.com.br.localizeme.system.extensions.isConnected
+import andcordeiro.com.br.localizeme.R
 import android.content.Context
+import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 
-class MapsPresenter(var model: MapsMVP.Model, var context: Context): MapsMVP.Presenter,
+class MapsPresenter(var model: MapsMVP.Model): MapsMVP.Presenter,
         LocationListener {
 
     private var view: MapsMVP.View? = null
@@ -25,16 +25,21 @@ class MapsPresenter(var model: MapsMVP.Model, var context: Context): MapsMVP.Pre
 
     override fun loadPlaces(query: String?) {
         if(myMarkerCreated){
-            if(isConnected(context)){
-                subscription = model.loadPlaces(query!!, getLocation())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({view?.clearMapsMakers(); view?.setMakersPlaces(it)},
-                                {view?.shortShowMessage("Deu erro")})
-            }else{
-                view?.shortShowMessage("Please connect Internet to search!")
-            }
+            subscription = model.loadPlacesAsync(query!!, getLocation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({
+                        if(!it.status.equals(view!!.getContext()
+                                        .getString(R.string.zero_results_search_returned))){
+                            view?.clearMapsMakers();
+                            view?.setMakersPlaces(it)
+                        }else{
+                            view?.shortShowMessage(view!!.getContext()
+                                    .getString(R.string.search_no_returned_results))
+                        }
+                    }, {view?.shortShowMessage(view!!.getContext()
+                            .getString(R.string.please_check_connection_internet))})
         }else{
-            view?.shortShowMessage("Please wait until you find your location!")
+            view?.shortShowMessage(view!!.getContext().getString(R.string.find_location_for_search))
         }
     }
 
@@ -55,15 +60,16 @@ class MapsPresenter(var model: MapsMVP.Model, var context: Context): MapsMVP.Pre
 
     override fun startGps() {
         try {
-            locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            locationManager = view!!.getContext()
+                    .getSystemService(Context.LOCATION_SERVICE) as LocationManager
             if (locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 val location =
                         locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
                 if(location != null){
-                    this.location = Location(location.latitude, location.longitude)
+                    this.setLocation(location)
                 }
                 locationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        1000, 0.001F, this)
+                        1000, 0.0001F, this)
             } else {
                 view?.requestProviderEnable()
             }
@@ -84,9 +90,12 @@ class MapsPresenter(var model: MapsMVP.Model, var context: Context): MapsMVP.Pre
 
     override fun getLocation(): Location? = location
 
+    override fun setLocation(location: Location?) {
+        this.location = location
+    }
 
     override fun onLocationChanged(location: android.location.Location) {
-        this.location = Location(location.latitude, location.longitude)
+        this.location = location
         if(myMarkerCreated){
             view?.updateMyMakerPosition(this.location!!)
         }else{

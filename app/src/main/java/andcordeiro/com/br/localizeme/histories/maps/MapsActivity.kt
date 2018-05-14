@@ -1,7 +1,6 @@
 package andcordeiro.com.br.localizeme.histories.maps
 
 import andcordeiro.com.br.localizeme.R
-import andcordeiro.com.br.localizeme.entities.Location
 import andcordeiro.com.br.localizeme.entities.Place
 import andcordeiro.com.br.localizeme.entities.Result
 import andcordeiro.com.br.localizeme.system.dagger.App
@@ -12,6 +11,7 @@ import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
@@ -39,7 +39,9 @@ import javax.inject.Inject
 
 
 class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
-        SearchView.OnQueryTextListener, PermissionListener, GoogleMap.OnMarkerClickListener {
+        SearchView.OnQueryTextListener, PermissionListener, GoogleMap.OnMarkerClickListener,
+        SearchView.OnCloseListener{
+
 
     var map: GoogleMap? = null
     lateinit var toolbar: ActionBar
@@ -57,11 +59,6 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
 
         (application as App).getComponent().inject(this)
 
-        if(!isConnected(this)){
-            longShowMessage("An Internet connection is required for " +
-                    "this application to work properly")
-        }
-
         toolbar = supportActionBar!!
         val mapFragment =
                 supportFragmentManager.findFragmentById(R.id.maps) as SupportMapFragment
@@ -72,6 +69,9 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
 
     override fun onResume() {
         super.onResume()
+        if(!isConnected(this)){
+            longShowMessage(getString(R.string.message_connection_internet))
+        }
         permissions()
     }
 
@@ -89,8 +89,8 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
             permission: PermissionRequest?, token: PermissionToken?) {
         if (alertDialogPermission == null || !alertDialogPermission!!.isShowing) {
             alertDialogPermission = AlertDialog.Builder(this@MapsActivity)
-                    .setTitle("Alert")
-                    .setMessage("Do you want to grant permission to continue?")
+                    .setTitle(android.R.string.dialog_alert_title)
+                    .setMessage(getString(R.string.message_premission_to_continue))
                     .setNegativeButton(android.R.string.cancel, { dialogInterface, _ ->
                         dialogInterface.dismiss()
                         token?.cancelPermissionRequest()
@@ -107,7 +107,7 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
 
     override fun onPermissionDenied(response: PermissionDeniedResponse?) {
         if (response!!.isPermanentlyDenied) {
-            shortShowMessage("Please grant permission to use the application")
+            shortShowMessage(getString(R.string.message_permission_to_use_application))
             finish()
         }
     }
@@ -125,8 +125,9 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
         val searchView = menu.findItem(R.id.item_search).actionView as SearchView
         searchView.setSearchableInfo(searchManager.getSearchableInfo((componentName)))
-        searchView.queryHint = "Location"
+        searchView.queryHint = getString(R.string.place_search_hint)
         searchView.setOnQueryTextListener(this)
+        searchView.setOnCloseListener(this)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -134,6 +135,8 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
         super.onStart()
         presenter.setView(this)
     }
+
+    override fun getContext(): Context = this
 
     override fun onStop() {
         super.onStop()
@@ -150,30 +153,43 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
         return true
     }
 
+    override fun onClose(): Boolean {
+        if(presenter.getLocation() != null){
+            clearMapsMakers()
+        }
+        return false
+    }
+
     override fun onQueryTextChange(newText: String?): Boolean = false
 
     override fun createMyMakerPosition(location: Location?) {
         markerMe = map?.addMarker(MarkerOptions()
-                .position(LatLng(presenter.getLocation()!!.lat!!, presenter.getLocation()!!.lng!!))
+                .position(LatLng(presenter.getLocation()!!.latitude,
+                        presenter.getLocation()!!.longitude))
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                .title("I'm here!"))
+                .title(getString(R.string.im_here)))
 
         map?.setOnMarkerClickListener(this)
         map?.animateCamera(CameraUpdateFactory.newLatLngZoom(markerMe?.position, 14.0F))
     }
 
     override fun updateMyMakerPosition(location: Location?) {
-        markerMe?.position = LatLng(location!!.lat!!, location.lng!!)
+        markerMe?.position = LatLng(location!!.latitude, location.longitude)
     }
 
     override fun setMakersPlaces(result: Result) {
         val places: MutableList<Place> = result.places as MutableList<Place>
         places.forEach { place: Place ->
+            if(places.size > 10 && places[10].equals(place)){
+                return
+            }
             map?.addMarker(MarkerOptions()
                     .position(LatLng(place.geometry!!.location!!.lat!!,
                             place.geometry!!.location!!.lng!!))
-                    .title(place.name))
+                    .title(place.name))!!
+                    .setSnippet(place.vicinity)
         }
+        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(markerMe?.position, 11.5F))
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
@@ -187,8 +203,7 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
 
     override fun clearMapsMakers() {
         map?.clear()
-        createMyMakerPosition(Location(presenter.getLocation()!!.lat!!,
-                presenter.getLocation()!!.lng!!))
+        createMyMakerPosition(presenter.getLocation())
     }
 
     override fun shortShowMessage(msg: String?) =
@@ -206,7 +221,6 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
                     .setPositiveButton(this.getString(R.string.request_gps_enable_button),
                             { _, _ -> this.startActivity(
                                     Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) })
-                    .setCancelable(false)
                     .create()
             try {
                 alertDialog!!.show()

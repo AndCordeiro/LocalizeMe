@@ -1,10 +1,23 @@
 <resources>
-    <string name="app_name">Localize Me</string>
+    <string name="app_name" translatable="false">Localize Me</string>
 
     <string name="request_gps_enable_title">Enable location</string>
-    <string name="request_gps_enable_msg">We need your enabled location to proceed</string>
+    <string name="request_gps_enable_msg">To continue enable the location</string>
     <string name="request_gps_enable_button">Enable location</string>
     <string name="google_maps_key">Your Key Here</string>
     <string name="search">Search</string>
+    <string name="message_connection_internet">An Internet connection is required for this application to work properly</string>
+    <string name="message_premission_to_continue">Do you want to grant permission to continue?</string>
+    <string name="message_permission_to_use_application">Please grant permission to use the application</string>
+    <string name="place_search_hint">Place search</string>
+    <string name="im_here">I\'m here!</string>
+    <string name="language_search_pt" translatable="false">pt-BR</string>
+    <string name="distance_search" translatable="false">distance</string>
+    <string name="zero_results_search_returned" translatable="false">ZERO_RESULTS</string>
+    <string name="search_no_returned_results">Your search returned no results</string>
+    <string name="please_check_connection_internet">Please check the internet and try again!</string>
+    <string name="find_location_for_search">Please wait until you find your location!</string>
+
+    <string name="location_parameters">%s, %s</string>
 
 </resources>

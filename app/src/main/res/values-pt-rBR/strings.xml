@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="request_gps_enable_title">Ligar localização</string>
+    <string name="request_gps_enable_msg">Para continuar, ative a localização</string>
+    <string name="request_gps_enable_button">Ligar localização</string>
+    <string name="search">Pesquisar</string>
+    <string name="message_connection_internet">Uma conexão com a Internet é necessária para este aplicativo funcionar corretamente</string>
+    <string name="message_premission_to_continue">Você quer conceder permissão para continuar?</string>
+    <string name="message_permission_to_use_application">Por favor, conceda permissão para usar o aplicativo</string>
+    <string name="place_search_hint">Pesquisar local</string>
+    <string name="im_here">Estou aqui!</string>
+    <string name="search_no_returned_results">Sua pesquisa não retornou resultados</string>
+    <string name="please_check_connection_internet">Por favor, verifique a internet e tente novamente!</string>
+    <string name="find_location_for_search">Por favor, aguarde até encontrarmos a sua localização!</string>
+
+</resources>

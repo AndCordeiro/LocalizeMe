@@ -1,6 +1,7 @@
 package andcordeiro.com.br.localizeme.histories.maps
 
-import andcordeiro.com.br.localizeme.entities.Location
+import android.location.Location
+
 
 interface Gps{
 
@@ -11,4 +12,6 @@ interface Gps{
     fun stopGps()
 
     fun getLocation(): Location?
+
+    fun setLocation(location: Location?)
 }

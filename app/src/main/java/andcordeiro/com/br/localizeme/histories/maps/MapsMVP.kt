@@ -1,7 +1,9 @@
 package andcordeiro.com.br.localizeme.histories.maps
 
-import andcordeiro.com.br.localizeme.entities.Location
+
 import andcordeiro.com.br.localizeme.entities.Result
+import android.content.Context
+import android.location.Location
 import rx.Observable
 
 interface MapsMVP{
@@ -21,6 +23,8 @@ interface MapsMVP{
         fun requestProviderEnable()
 
         fun clearMapsMakers()
+
+        fun getContext(): Context
     }
 
     interface Presenter: Gps {
@@ -38,7 +42,7 @@ interface MapsMVP{
     }
 
     interface Model{
-        fun loadPlaces(query: String, location: Location?): Observable<Result>
+        fun loadPlacesAsync(query: String, location: Location?): Observable<Result>
     }
 
 }

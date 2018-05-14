@@ -9,8 +9,8 @@ import dagger.Provides
 class MapsModule {
 
     @Provides
-    fun provideMapsPresenter(mapsModel: MapsMVP.Model, context: Context): MapsMVP.Presenter {
-        return MapsPresenter(mapsModel, context)
+    fun provideMapsPresenter(mapsModel: MapsMVP.Model): MapsMVP.Presenter {
+        return MapsPresenter(mapsModel)
     }
 
     @Provides
