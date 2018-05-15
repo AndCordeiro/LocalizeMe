@@ -1,6 +1,7 @@
 # Localize Me
 
 Aplicativo Android de teste.
+Aplivativo tem como objetivo mostrar no mapa os lugares mais próximos a partir de uma pesquisa.
 
 
 ## Pré requisitos
