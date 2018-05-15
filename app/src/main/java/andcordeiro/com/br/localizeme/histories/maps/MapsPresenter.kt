@@ -31,7 +31,7 @@ class MapsPresenter(var model: MapsMVP.Model): MapsMVP.Presenter,
                     .subscribe({
                         if(!it.status.equals(view!!.getContext()
                                         .getString(R.string.zero_results_search_returned))){
-                            view?.clearMapsMakers();
+                            view?.clearMapsMakers()
                             view?.setMakersPlaces(it)
                         }else{
                             view?.shortShowMessage(view!!.getContext()

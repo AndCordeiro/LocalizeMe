@@ -136,6 +136,7 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
     override fun onStop() {
         super.onStop()
         presenter.rxUnsubscribe()
+        presenter.stopGps()
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
