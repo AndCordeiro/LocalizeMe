@@ -1,9 +1,9 @@
 package andcordeiro.com.br.localizeme.histories.maps
 
-
 import andcordeiro.com.br.localizeme.entities.Result
 import android.content.Context
 import android.location.Location
+import com.google.android.gms.maps.GoogleMap
 import rx.Observable
 
 interface MapsMVP{
@@ -25,6 +25,8 @@ interface MapsMVP{
         fun clearMapsMakers()
 
         fun getContext(): Context
+
+        fun map(): GoogleMap?
     }
 
     interface Presenter: Gps {
@@ -39,6 +41,7 @@ interface MapsMVP{
 
         fun getMyMarkerCreated(): Boolean
 
+        fun createdMyMarker()
     }
 
     interface Model{

@@ -2,6 +2,7 @@ package andcordeiro.com.br.localizeme.histories.maps
 
 
 import andcordeiro.com.br.localizeme.R
+import android.app.Activity
 import android.content.Context
 import android.location.Location
 import android.location.LocationListener
@@ -65,11 +66,10 @@ class MapsPresenter(var model: MapsMVP.Model): MapsMVP.Presenter,
             if (locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 val location =
                         locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                if(location != null){
-                    this.setLocation(location)
-                }
+                this.setLocation(location)
+                createdMyMarker()
                 locationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        1000, 0.0001F, this)
+                        0, 0F, this)
             } else {
                 view?.requestProviderEnable()
             }
@@ -94,13 +94,18 @@ class MapsPresenter(var model: MapsMVP.Model): MapsMVP.Presenter,
         this.location = location
     }
 
+    override fun createdMyMarker() {
+        if(!myMarkerCreated && view!!.map() != null && getLocation() != null){
+            view?.createMyMakerPosition(this.location!!)
+        }
+    }
+
     override fun onLocationChanged(location: android.location.Location) {
         this.location = location
         if(myMarkerCreated){
             view?.updateMyMakerPosition(this.location!!)
         }else{
-            view?.createMyMakerPosition(this.location!!)
-            myMarkerCreated = true
+            createdMyMarker()
         }
     }
 
@@ -108,6 +113,9 @@ class MapsPresenter(var model: MapsMVP.Model): MapsMVP.Presenter,
 
     override fun onProviderEnabled(provider: String?) {}
 
-    override fun onProviderDisabled(provider: String?) {}
-
+    override fun onProviderDisabled(provider: String?) {
+        if (!(view?.getContext() as Activity).isFinishing) {
+            startGps()
+        }
+    }
 }

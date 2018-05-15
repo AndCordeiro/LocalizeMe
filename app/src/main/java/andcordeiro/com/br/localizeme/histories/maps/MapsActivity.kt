@@ -5,14 +5,11 @@ import andcordeiro.com.br.localizeme.entities.Place
 import andcordeiro.com.br.localizeme.entities.Result
 import andcordeiro.com.br.localizeme.system.dagger.App
 import andcordeiro.com.br.localizeme.system.extensions.isConnected
-import andcordeiro.com.br.localizeme.system.receiver.GpsReceiver
 import android.Manifest
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
 import android.support.v7.app.ActionBar
@@ -47,7 +44,6 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
     lateinit var toolbar: ActionBar
     var markerMe: Marker? = null
     private var alertDialog: AlertDialog? = null
-    private var gpsReceiver: GpsReceiver? = null
     private var alertDialogPermission: AlertDialog? = null
 
     @Inject
@@ -63,8 +59,6 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
         val mapFragment =
                 supportFragmentManager.findFragmentById(R.id.maps) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        gpsReceiver = GpsReceiver()
-        registerReceiver(gpsReceiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
     }
 
     override fun onResume() {
@@ -114,10 +108,11 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
 
     override fun onMapReady(gMap: GoogleMap?) {
         map = gMap
-        if (presenter.getLocation() != null && !presenter.getMyMarkerCreated()) {
-            createMyMakerPosition(presenter.getLocation()!!)
-            presenter.setMyMarkerCreated(true)
-        }
+        presenter.createdMyMarker()
+    }
+
+    override fun map(): GoogleMap? {
+        return map
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -143,18 +138,13 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
         presenter.rxUnsubscribe()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(gpsReceiver)
-    }
-
     override fun onQueryTextSubmit(query: String?): Boolean {
         presenter.loadPlaces(query)
         return true
     }
 
     override fun onClose(): Boolean {
-        if(presenter.getLocation() != null){
+        if(presenter.getLocation() != null && markerMe != null){
             clearMapsMakers()
         }
         return false
@@ -170,7 +160,9 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
                 .title(getString(R.string.im_here)))
 
         map?.setOnMarkerClickListener(this)
+        presenter.setMyMarkerCreated(true)
         map?.animateCamera(CameraUpdateFactory.newLatLngZoom(markerMe?.position, 14.0F))
+
     }
 
     override fun updateMyMakerPosition(location: Location?) {
@@ -203,11 +195,12 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
 
     override fun clearMapsMakers() {
         map?.clear()
-        createMyMakerPosition(presenter.getLocation())
+        presenter.setMyMarkerCreated(false)
+        presenter.createdMyMarker()
     }
 
     override fun shortShowMessage(msg: String?) =
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
     override fun longShowMessage(msg: String?) =
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
@@ -221,6 +214,11 @@ class MapsActivity : AppCompatActivity(), MapsMVP.View, OnMapReadyCallback,
                     .setPositiveButton(this.getString(R.string.request_gps_enable_button),
                             { _, _ -> this.startActivity(
                                     Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)) })
+                    .setNegativeButton(android.R.string.cancel,
+                            { _, _ ->
+                                    alertDialog = null
+                                    presenter.startGps()
+                            })
                     .create()
             try {
                 alertDialog!!.show()
